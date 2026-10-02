@@ -1,0 +1,59 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+
+export default function AnnouncementsPage() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/v1/student/announcements', { credentials: 'include' })
+      .then(res => res.json())
+      .then(d => {
+        setData(d.error ? [] : d);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return (
+    <div className="bg-card rounded-2xl shadow-sm shadow-border border border-border p-6">
+      <h2 className="text-2xl font-bold text-foreground mb-6">Announcements</h2>
+      
+      {loading ? (
+        <div className="space-y-4">
+          {[1,2,3].map(i => <div key={i} className="h-16 bg-muted animate-pulse rounded-xl"></div>)}
+        </div>
+      ) : data.length === 0 ? (
+        <p className="text-muted-foreground">No records found.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-xs text-muted-foreground uppercase bg-background">
+              <tr>
+                {Object.keys(data[0] || {}).map(k => (
+                  <th key={k} className="px-6 py-3">{k.replace('_', ' ')}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row: any, i: number) => (
+                <motion.tr 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  key={i} 
+                  className="bg-card border-b hover:bg-background"
+                >
+                  {Object.values(row).map((val: any, j: number) => (
+                    <td key={j} className="px-6 py-4 font-medium text-foreground">{val}</td>
+                  ))}
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
