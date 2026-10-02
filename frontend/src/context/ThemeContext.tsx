@@ -76,14 +76,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setAccentColor(DEFAULT_ACCENT);
   };
 
-  // Prevent flash of incorrect theme
-  if (!mounted) {
-    return <div style={{ visibility: 'hidden' }}>{children}</div>;
-  }
-
   return (
     <ThemeContext.Provider value={{ mode, setMode, accentColor, setAccentColor, resetTheme }}>
-      {children}
+      {!mounted ? <div style={{ visibility: 'hidden' }}>{children}</div> : children}
     </ThemeContext.Provider>
   );
 }
