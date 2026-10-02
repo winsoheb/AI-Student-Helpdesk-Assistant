@@ -17,19 +17,19 @@ export default function ChatsPage() {
   }, []);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">Chat Monitoring</h2>
+    <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+      <h2 className="text-2xl font-bold text-foreground mb-6">Chat Monitoring</h2>
       
       {loading ? (
         <div className="space-y-4">
-          {[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 animate-pulse rounded-xl"></div>)}
+          {[1,2,3].map(i => <div key={i} className="h-16 bg-muted animate-pulse rounded-xl"></div>)}
         </div>
       ) : data.length === 0 ? (
-        <p className="text-slate-500">No records found.</p>
+        <p className="text-muted-foreground">No records found.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-500 uppercase bg-slate-50">
+            <thead className="text-xs text-muted-foreground uppercase bg-muted">
               <tr>
                 {Object.keys(data[0] || {}).map(k => (
                   <th key={k} className="px-6 py-3">{k.replace('_', ' ')}</th>
@@ -38,15 +38,15 @@ export default function ChatsPage() {
             </thead>
             <tbody>
               {data.map((row: any, i: number) => (
-                <motion.tr 
+                  <motion.tr 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   key={i} 
-                  className="bg-white border-b hover:bg-slate-50"
+                  className="bg-background border-b border-border hover:bg-muted/50"
                 >
                   {Object.values(row).map((val: any, j: number) => (
-                    <td key={j} className="px-6 py-4 font-medium text-slate-900">{val}</td>
+                    <td key={j} className="px-6 py-4 font-medium text-foreground">{val}</td>
                   ))}
                 </motion.tr>
               ))}
