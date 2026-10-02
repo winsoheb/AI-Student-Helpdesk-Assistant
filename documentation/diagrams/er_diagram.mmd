@@ -1,0 +1,9 @@
+erDiagram
+    USER ||--o| STUDENT : has
+    DEPARTMENT ||--o{ STUDENT : contains
+    DEPARTMENT ||--o{ COURSE : offers
+    COURSE ||--o{ SUBJECT : includes
+    STUDENT ||--o{ CHAT_SESSION : owns
+    CHAT_SESSION ||--o{ CHAT_MESSAGE : contains
+    SUBJECT ||--o{ STUDY_MATERIAL : has
+    STUDY_MATERIAL ||--o{ DOCUMENT_CHUNK : chunked_into

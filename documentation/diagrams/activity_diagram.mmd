@@ -1,0 +1,11 @@
+graph TD
+    Start[User types message] --> API[Backend receives message]
+    API --> CheckIntent{Is Intent Structured?}
+    CheckIntent -->|Yes, e.g. Timetable| DBQuery[Query SQLite directly]
+    CheckIntent -->|No, General QA| NLP[Run TF-IDF on Chunks]
+    NLP --> Threshold{Score > 0.05?}
+    Threshold -->|Yes| Extract[Return best chunk]
+    Threshold -->|No| Fallback[Return fallback message]
+    DBQuery --> Response[Send JSON to UI]
+    Extract --> Response
+    Fallback --> Response

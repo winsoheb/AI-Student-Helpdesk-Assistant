@@ -1,0 +1,8 @@
+graph TD
+    Student -->|Ask Question| Process1[Chatbot Engine]
+    Admin -->|Upload PDF| Process2[Document Processor]
+    Process2 -->|Raw Text| Process3[Chunking Engine]
+    Process3 -->|Text Chunks| DB[(Database)]
+    Process1 -->|Vector Search| DB
+    DB -->|Best Match| Process1
+    Process1 -->|Formatted Answer| Student

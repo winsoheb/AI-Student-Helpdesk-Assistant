@@ -1,0 +1,6 @@
+graph TD
+    UI[Next.js Frontend React] <-->|JSON over HTTP| API[Flask REST API]
+    API <--> ORM[SQLAlchemy]
+    ORM <--> DB[(SQLite Database)]
+    API <--> NLP[TF-IDF AI Engine]
+    NLP <--> FileSys[Local Uploads Dir]

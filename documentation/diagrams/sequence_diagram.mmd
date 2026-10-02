@@ -1,0 +1,16 @@
+sequenceDiagram
+    actor Student
+    participant Frontend
+    participant API
+    participant AI
+    participant DB
+    
+    Student->>Frontend: Ask "What is static variable?"
+    Frontend->>API: POST /chat {msg}
+    API->>AI: search_documents(msg)
+    AI->>DB: Fetch DocumentChunks
+    DB-->>AI: chunks[]
+    AI->>AI: Vectorize & Cosine Similarity
+    AI-->>API: Extracted Answer
+    API-->>Frontend: JSON Response
+    Frontend-->>Student: Display Answer

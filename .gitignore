@@ -1,0 +1,13 @@
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.env
+user_data/
+uploads/
+frontend/.next/
+frontend/out/
+*.db
+dist/
+build/
+*.spec

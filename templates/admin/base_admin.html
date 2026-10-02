@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<div class="d-flex">
+    <div class="sidebar" style="width: 250px; flex-shrink: 0; min-height: 100vh;">
+        <h4 class="px-3 mb-4">Admin Panel</h4>
+        <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin.departments') }}">Departments</a>
+        <a href="{{ url_for('admin.courses') }}">Courses</a>
+        <a href="{{ url_for('admin.subjects') }}">Subjects</a>
+        <a href="{{ url_for('admin.students') }}">Students</a>
+        <a href="{{ url_for('admin_acad.materials') }}">Study Materials</a>
+        <a href="{{ url_for('admin_acad.assignments') }}">Assignments</a>
+        <a href="{{ url_for('admin_acad.examinations') }}">Examinations</a>
+        <a href="{{ url_for('admin_acad.timetable') }}">Timetable</a>
+        <a href="{{ url_for('admin_acad.announcements') }}">Announcements</a>
+        <a href="{{ url_for('admin.faqs') }}">FAQs</a>
+        <a href="{{ url_for('auth.logout') }}" class="text-danger mt-5">Logout</a>
+    </div>
+    
+    <div class="main-content flex-grow-1 p-4" style="background-color: #f8f9fa;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

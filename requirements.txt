@@ -1,0 +1,10 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-CORS
+Werkzeug
+Waitress
+PyInstaller
+scikit-learn
+pypdf2
+python-docx
