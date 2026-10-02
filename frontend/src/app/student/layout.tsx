@@ -22,7 +22,8 @@ import { ThemeSettingsModal } from '@/components/ThemeSettings';
 import { Settings } from 'lucide-react';
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isThemeSettingsOpen, setThemeSettingsOpen] = useState(false);
@@ -33,6 +34,14 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const { user, logout } = useAuth();
 
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      setSidebarOpen(window.innerWidth >= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     // Fetch notifications
     fetch('http://localhost:5000/api/v1/student/announcements', { credentials: 'include' })
       .then(res => res.json())
@@ -51,7 +60,10 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   const navItems = [
@@ -65,18 +77,37 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="flex h-screen bg-background overflow-hidden text-foreground">
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isMobile && isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black/50 z-20 backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <AnimatePresence mode="wait">
-        {isSidebarOpen && (
+        {(isSidebarOpen || !isMobile) && (
           <motion.aside 
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 280, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            initial={isMobile ? { x: -280 } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0 } : { width: 280, opacity: 1 }}
+            exit={isMobile ? { x: -280 } : { width: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="flex-shrink-0 bg-card border-r border-border z-20 hidden md:flex flex-col"
+            className={`flex-shrink-0 bg-card border-r border-border z-30 flex flex-col h-full ${isMobile ? 'fixed left-0 top-0 shadow-2xl' : 'relative'}`}
+            style={{ width: 280 }}
           >
-            <div className="h-16 flex items-center px-6 border-b border-border">
+            <div className="h-16 flex items-center justify-between px-6 border-b border-border">
               <span className="text-xl font-bold text-primary tracking-tight">Helpdesk AI</span>
+              {isMobile && (
+                <button onClick={() => setSidebarOpen(false)} className="p-1 text-muted-foreground hover:text-foreground">
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
             
             <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
@@ -84,7 +115,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
-                  <Link href={item.href} key={item.name}>
+                  <Link href={item.href} key={item.name} onClick={() => isMobile && setSidebarOpen(false)}>
                     <motion.div
                       whileHover={{ x: 5 }}
                       whileTap={{ scale: 0.95 }}
@@ -117,7 +148,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           <div className="flex items-center">
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="p-2 mr-4 text-muted-foreground hover:bg-muted rounded-md hidden md:block"
+              className="p-2 mr-3 text-muted-foreground hover:bg-muted rounded-md"
             >
               <Menu className="w-5 h-5" />
             </button>
