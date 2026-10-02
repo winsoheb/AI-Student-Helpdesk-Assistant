@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     student_profile = db.relationship('Student', backref='user', uselist=False, cascade="all, delete-orphan")
+    faculty_profile = db.relationship('Faculty', backref='user', uselist=False, cascade="all, delete-orphan")
 
 class Department(db.Model):
     __tablename__ = 'departments'
@@ -51,6 +52,17 @@ class Student(db.Model):
     semester = db.Column(db.Integer, nullable=False)
     admission_year = db.Column(db.Integer, nullable=False)
     address = db.Column(db.Text, nullable=True)
+    contact_number = db.Column(db.String(20), nullable=True)
+    profile_photo = db.Column(db.String(255), nullable=True)
+
+class Faculty(db.Model):
+    __tablename__ = 'faculty'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    faculty_id = db.Column(db.String(50), unique=True, nullable=False)
+    full_name = db.Column(db.String(100), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
+    designation = db.Column(db.String(100), nullable=True)
     contact_number = db.Column(db.String(20), nullable=True)
     profile_photo = db.Column(db.String(255), nullable=True)
 

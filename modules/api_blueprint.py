@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
-from database.models import db, Department, Course, Subject, Student, FAQ, Assignment, Examination, Timetable, Announcement, StudyMaterial, ChatSession, ChatMessage, User
+from database.models import db, Department, Course, Subject, Student, Faculty, FAQ, Assignment, Examination, Timetable, Announcement, StudyMaterial, ChatSession, ChatMessage, User
 from datetime import date
 
 api_bp = Blueprint('api_v1', __name__, url_prefix='/api/v1')
@@ -108,6 +108,40 @@ def admin_students():
         
     students = Student.query.all()
     return jsonify([{'id': s.id, 'roll_number': s.student_roll_number, 'name': s.full_name, 'semester': s.semester, 'department': Department.query.get(s.department_id).department_code if Department.query.get(s.department_id) else ''} for s in students])
+
+@api_bp.route('/admin/faculty', methods=['GET', 'POST', 'DELETE'])
+@login_required
+def admin_faculty():
+    if current_user.role != 'admin': return jsonify({'error': 'Unauthorized'}), 403
+    if request.method == 'POST':
+        data = request.json
+        from werkzeug.security import generate_password_hash
+        
+        # Auto-generate Faculty ID: F<DeptCode><Sequence>
+        dept = Department.query.get(data['department_id'])
+        if not dept: return jsonify({'error': 'Invalid department'}), 400
+        count = Faculty.query.filter_by(department_id=dept.id).count()
+        faculty_id = f"F{dept.department_code}{(count + 1):03d}"
+        
+        user = User(username=faculty_id, password_hash=generate_password_hash(faculty_id), role='faculty')
+        db.session.add(user)
+        db.session.commit()
+        f = Faculty(user_id=user.id, faculty_id=faculty_id, full_name=data['name'], department_id=data['department_id'], designation=data.get('designation'), contact_number=data.get('contact_number'))
+        db.session.add(f)
+        db.session.commit()
+        return jsonify({'message': 'Added'})
+    elif request.method == 'DELETE':
+        data = request.json
+        f = Faculty.query.get(data['id'])
+        if f:
+            u = User.query.get(f.user_id)
+            db.session.delete(f)
+            if u: db.session.delete(u)
+            db.session.commit()
+        return jsonify({'message': 'Deleted'})
+        
+    faculties = Faculty.query.all()
+    return jsonify([{'id': f.id, 'faculty_id': f.faculty_id, 'name': f.full_name, 'designation': f.designation, 'department': Department.query.get(f.department_id).department_code if Department.query.get(f.department_id) else ''} for f in faculties])
 
 @api_bp.route('/admin/departments', methods=['GET', 'POST', 'DELETE'])
 @login_required
@@ -307,3 +341,56 @@ def admin_dashboard():
         'weekly_uploads': uploads,
         'department_stats': dept_stats
     })
+
+@api_bp.route('/admin/announcements', methods=['GET', 'POST', 'DELETE'])
+@login_required
+def admin_announcements_crud():
+    if current_user.role != 'admin': return jsonify({'error': 'Unauthorized'}), 403
+    if request.method == 'POST':
+        data = request.json
+        a = Announcement(
+            title=data['title'], 
+            description=data['description'],
+            target_department_id=data.get('department_id') or None,
+            target_course_id=data.get('course_id') or None
+        )
+        db.session.add(a)
+        db.session.commit()
+        return jsonify({'message': 'Added'})
+    elif request.method == 'DELETE':
+        a = Announcement.query.get(request.json['id'])
+        if a: 
+            db.session.delete(a)
+            db.session.commit()
+        return jsonify({'message': 'Deleted'})
+        
+    ann = Announcement.query.order_by(Announcement.published_at.desc()).all()
+    return jsonify([{
+        'id': a.id, 
+        'title': a.title, 
+        'desc': a.description, 
+        'date': str(a.published_at.date()),
+        'course': Course.query.get(a.target_course_id).course_name if a.target_course_id else 'All',
+        'department': Department.query.get(a.target_department_id).department_name if a.target_department_id else 'All'
+    } for a in ann])
+
+@api_bp.route('/admin/chats', methods=['GET'])
+@login_required
+def admin_chats():
+    if current_user.role != 'admin': return jsonify({'error': 'Unauthorized'}), 403
+    
+    sessions = ChatSession.query.order_by(ChatSession.created_at.desc()).all()
+    result = []
+    for s in sessions:
+        student = Student.query.get(s.student_id)
+        msg_count = ChatMessage.query.filter_by(session_id=s.id).count()
+        if student:
+            result.append({
+                'Session_ID': s.id,
+                'Student_Name': student.full_name,
+                'Roll_Number': student.student_roll_number,
+                'Topic': s.session_title or 'General Query',
+                'Total_Messages': msg_count,
+                'Date': str(s.created_at.date())
+            })
+    return jsonify(result)
