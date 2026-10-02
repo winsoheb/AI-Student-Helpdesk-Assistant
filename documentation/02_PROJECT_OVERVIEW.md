@@ -30,4 +30,5 @@ The project covers Admin capabilities (managing students, subjects, materials, e
 - **Centralized Academic Information:** A single digital repository for college data.
 - **Student Self-Service Portal:** View profiles, timetables, and assignments.
 - **AI-based Question Answering:** An offline chatbot that parses college-uploaded study materials to answer queries instantly.
-- **Administrative Information Management:** A Next.js dashboard for admins.
+- **Administrative Information Management:** A Next.js dashboard for admins (including Faculty and Announcement management).
+- **Dynamic Theming Engine:** A robust Light/Dark mode and accent color system customizable per user.

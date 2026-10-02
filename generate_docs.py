@@ -84,7 +84,8 @@ The project covers Admin capabilities (managing students, subjects, materials, e
 - **Centralized Academic Information:** A single digital repository for college data.
 - **Student Self-Service Portal:** View profiles, timetables, and assignments.
 - **AI-based Question Answering:** An offline chatbot that parses college-uploaded study materials to answer queries instantly.
-- **Administrative Information Management:** A Next.js dashboard for admins.
+- **Administrative Information Management:** A Next.js dashboard for admins (including Faculty and Announcement management).
+- **Dynamic Theming Engine:** A robust Light/Dark mode and accent color system customizable per user.
 """
 
 files["03_SYSTEM_ARCHITECTURE.md"] = """# Chapter 4: System Architecture
@@ -139,10 +140,12 @@ The system relies on SQLite via SQLAlchemy.
 13. **chat_sessions:** id, student_id (FK), session_title, created_at.
 14. **chat_messages:** id, session_id (FK), sender ('student' or 'bot'), message, intent, created_at.
 15. **feedback:** id, student_id, chat_message_id, rating, comments.
+16. **faculty:** id, user_id (FK), faculty_id, full_name, department_id, designation, contact_number.
 
 ## Relationships
 - A `User` (student role) has one `Student` profile.
-- A `Department` has many `Courses` and `Students`.
+- A `User` (faculty role) has one `Faculty` profile.
+- A `Department` has many `Courses`, `Students`, and `Faculty`.
 - A `StudyMaterial` has many `DocumentChunks`.
 - A `ChatSession` has many `ChatMessages`.
 """
@@ -163,17 +166,21 @@ files["06_MODULE_DOCUMENTATION.md"] = """# Chapter 6: System Modules
 
 ## 6.1 Administrator Module
 - **Dashboard Analytics:** Real-time metrics (Total students, FAQs, Uploads) and charts (AI usage trends, Students by Dept) built with Recharts.
-- **Student Management:** Add students with auto-generated Roll Numbers.
+- **Student & Faculty Management:** Add students and faculty with auto-generated Roll/Faculty IDs.
 - **Subject Management:** Create subjects linked to courses.
 - **Study Materials:** Upload PDFs/DOCX which trigger AI processing.
 - **Timetable & Assignments:** Create academic schedules using dropdown selectors for Subjects.
 - **Chat Monitoring:** View logs of student queries.
+- **Announcements:** Post real-time updates targeted to specific courses or departments.
 
 ## 6.2 Student Module
 - **AI Chatbot Interface:** Interact with the college knowledge base via a chat interface.
 - **Timetable View:** See class schedules filtered by the student's department/semester.
 - **Assignments View:** Track due dates for enrolled subjects.
 - **Materials View:** Browse and download uploaded PDFs/DOCX.
+
+## 6.3 Global UI Engine
+- **Theme Customization:** Global Context-driven theme engine supporting Light, Dark, and System modes, alongside 8 custom accent colors (Blue, Violet, Purple, Cyan, Green, Orange, Rose, Teal) persisted in local storage.
 """
 
 files["07_AI_CHATBOT_DOCUMENTATION.md"] = """# Chapter 7: AI Chatbot Implementation
@@ -205,17 +212,21 @@ Base URL: `http://localhost:5000/api/v1`
 ## Admin Routes (Requires Admin Role)
 - `GET /admin/dashboard`: Returns analytics (total_students, ai_trends, etc).
 - `GET, POST, DELETE /admin/students`: Manage students. POST auto-generates Roll No and creates User.
+- `GET, POST, DELETE /admin/faculty`: Manage faculty. POST auto-generates Faculty ID and creates User.
 - `GET, POST, DELETE /admin/departments`: Manage departments.
 - `GET, POST, DELETE /admin/subjects`: Manage subjects.
 - `GET, POST, DELETE /admin/materials`: Manage materials. POST accepts `multipart/form-data` and triggers `process_and_store_document()`.
 - `GET, POST, DELETE /admin/assignments`: Manage assignments.
 - `GET, POST, DELETE /admin/timetable`: Manage timetables.
+- `GET, POST, DELETE /admin/announcements`: Manage announcements.
+- `GET /admin/chats`: View chat logs for monitoring.
 
 ## Student Routes (Requires Student Role)
 - `GET /student/profile`: Get student details.
 - `GET /student/timetable`: Get timetable for student's course/semester.
 - `GET /student/materials`: Get materials for student's subjects.
 - `GET /student/assignments`: Get assignments for student's subjects.
+- `GET /student/announcements`: View announcements relevant to the student's course.
 """
 
 files["09_TESTING_REPORT.md"] = """# Chapter 9: Testing
@@ -246,7 +257,9 @@ files["11_ADMIN_MANUAL.md"] = """# Chapter 11: Admin Manual
 1. **Dashboard:** View live charts of AI usage and student distributions.
 2. **Adding a Subject:** Go to "Subjects" -> "Add Subject". Fill in the details. This is required before adding timetables.
 3. **Uploading Materials:** Go to "Study Materials" -> "Add Material". Select the subject from the dropdown, upload a PDF. The system will say "Uploading & AI Processing". This means it is breaking the PDF into sentences to teach the AI.
-4. **Managing Students:** Go to "Students". You only need to enter their Name, Department, and Year. The system auto-generates their ID (e.g., `2024IT005`) and sets their password to the ID.
+4. **Managing Students & Faculty:** Go to "Students" or "Faculty". Fill in their basic details. The system auto-generates their ID (e.g., `2024IT005` or `FCOMP001`) and sets their password to their ID.
+5. **Publishing Announcements:** Go to "Announcements". You can post a message and optionally target it to a specific course or department.
+6. **Chat Monitoring:** Go to "Chat Monitoring" to see what students are asking the AI Assistant.
 """
 
 files["12_INSTALLATION_GUIDE.md"] = """# Chapter 12: Installation and Deployment
@@ -338,7 +351,9 @@ diagrams["system_architecture.mmd"] = '''graph TD
 
 diagrams["er_diagram.mmd"] = '''erDiagram
     USER ||--o| STUDENT : has
+    USER ||--o| FACULTY : has
     DEPARTMENT ||--o{ STUDENT : contains
+    DEPARTMENT ||--o{ FACULTY : employs
     DEPARTMENT ||--o{ COURSE : offers
     COURSE ||--o{ SUBJECT : includes
     STUDENT ||--o{ CHAT_SESSION : owns

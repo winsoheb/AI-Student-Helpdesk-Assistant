@@ -1,6 +1,8 @@
 erDiagram
     USER ||--o| STUDENT : has
+    USER ||--o| FACULTY : has
     DEPARTMENT ||--o{ STUDENT : contains
+    DEPARTMENT ||--o{ FACULTY : employs
     DEPARTMENT ||--o{ COURSE : offers
     COURSE ||--o{ SUBJECT : includes
     STUDENT ||--o{ CHAT_SESSION : owns

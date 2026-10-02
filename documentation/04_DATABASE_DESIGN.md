@@ -18,9 +18,11 @@ The system relies on SQLite via SQLAlchemy.
 13. **chat_sessions:** id, student_id (FK), session_title, created_at.
 14. **chat_messages:** id, session_id (FK), sender ('student' or 'bot'), message, intent, created_at.
 15. **feedback:** id, student_id, chat_message_id, rating, comments.
+16. **faculty:** id, user_id (FK), faculty_id, full_name, department_id, designation, contact_number.
 
 ## Relationships
 - A `User` (student role) has one `Student` profile.
-- A `Department` has many `Courses` and `Students`.
+- A `User` (faculty role) has one `Faculty` profile.
+- A `Department` has many `Courses`, `Students`, and `Faculty`.
 - A `StudyMaterial` has many `DocumentChunks`.
 - A `ChatSession` has many `ChatMessages`.
